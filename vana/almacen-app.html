@@ -236,12 +236,64 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--txt);min-h
 .btn-imp-cancel{flex:1;padding:12px;background:var(--surf2);border:1px solid var(--brd);border-radius:10px;color:var(--dim);font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;cursor:pointer;}
 .btn-imp-ok{flex:1;padding:12px;background:var(--acc);border:none;border-radius:10px;color:#0f0f1a;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;cursor:pointer;}
 .btn-imp-ok:disabled{opacity:.4;cursor:not-allowed;}
+
+/* ══ LISTA SCREEN ══ */
+.lista-row{
+  border-radius:12px;
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  border-left:4px solid transparent;
+  animation:up .2s ease;
+}
+.lista-row-num{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:12px;
+  font-weight:700;
+  opacity:.5;
+  min-width:20px;
+  text-align:right;
+  flex-shrink:0;
+}
+.lista-row-code{
+  font-family:var(--fbase),sans-serif;
+  font-size:var(--sz-list);
+  font-weight:900;
+  letter-spacing:1px;
+  flex-shrink:0;
+}
+.lista-row-desc{
+  font-family:var(--fbase),sans-serif;
+  font-size:13px;
+  opacity:.8;
+  flex:1;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.lista-row-alm{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:1px;
+  opacity:.7;
+  flex-shrink:0;
+}
+.lista-not-found{
+  border-radius:12px;
+  padding:12px 16px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:rgba(255,255,255,0.04);
+  border-left:4px solid #444;
+  animation:up .2s ease;
+}
 .toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%) translateY(16px);background:#2ecc71;color:#fff;padding:10px 22px;border-radius:24px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:1px;z-index:999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
 .toast.err{background:#e74c3c;}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-</head>
 <body>
 
 <!-- ══ SPLASH ══ -->
@@ -255,8 +307,10 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--txt);min-h
   </div>
 </div>
 
-<!-- ══ LISTA ══ -->
-<div id="pg-list" class="pg">
+
+
+<!-- ══ LISTA ══ (pg-list) ══ -->
+<div id="pg-list" class="pg on">
   <div class="hdr">
     <h1>Base de datos</h1>
     <div style="display:flex;gap:8px;align-items:center;">
@@ -278,7 +332,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--txt);min-h
   <div class="srch-hdr">
     <span class="srch-lbl">Introduce el código</span>
     <div class="srch-row">
-      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="flex-shrink:0">
         <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
       </svg>
       <input id="si" class="srch-inp" type="tel" inputmode="numeric" pattern="[0-9]*"
@@ -291,38 +345,6 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--txt);min-h
           <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"/>
         </svg>
       </button>
-    </div>
-  </div>
-
-  <!-- CAMERA OVERLAY -->
-  <div id="cam-overlay" style="display:none;position:fixed;inset:0;z-index:300;flex-direction:column;">
-    <video id="cam-video" autoplay playsinline muted
-      style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"></video>
-    <!-- Color tint overlay -->
-    <div id="cam-tint" style="position:absolute;inset:0;opacity:0;transition:opacity .4s;pointer-events:none;"></div>
-    <!-- Scan frame -->
-    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;">
-      <div id="cam-frame" style="width:220px;height:80px;border:2px solid rgba(255,255,255,0.7);border-radius:12px;box-shadow:0 0 0 2000px rgba(0,0,0,0.45);position:relative;">
-        <div style="position:absolute;top:-2px;left:-2px;width:20px;height:20px;border-top:3px solid #4fc3f7;border-left:3px solid #4fc3f7;border-radius:4px 0 0 0;"></div>
-        <div style="position:absolute;top:-2px;right:-2px;width:20px;height:20px;border-top:3px solid #4fc3f7;border-right:3px solid #4fc3f7;border-radius:0 4px 0 0;"></div>
-        <div style="position:absolute;bottom:-2px;left:-2px;width:20px;height:20px;border-bottom:3px solid #4fc3f7;border-left:3px solid #4fc3f7;border-radius:0 0 0 4px;"></div>
-        <div style="position:absolute;bottom:-2px;right:-2px;width:20px;height:20px;border-bottom:3px solid #4fc3f7;border-right:3px solid #4fc3f7;border-radius:0 0 4px 0;"></div>
-        <!-- Scan line animation -->
-        <div id="scan-line" style="position:absolute;left:4px;right:4px;height:2px;background:rgba(79,195,247,0.8);animation:scanline 1.8s ease-in-out infinite;"></div>
-      </div>
-      <div id="cam-manual-wrap" style="margin-top:14px;display:flex;gap:8px;align-items:center;"><input id="cam-manual" type="tel" inputmode="numeric" placeholder="Código manual" style="padding:10px 14px;background:rgba(0,0,0,0.5);border:1.5px solid rgba(255,255,255,0.35);border-radius:10px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;width:160px;outline:none;backdrop-filter:blur(6px);" oninput="tryCamCode(this.value)"/><button onclick="tryCamCode(document.getElementById('cam-manual').value,true)" style="padding:10px 16px;background:rgba(79,195,247,0.25);border:1.5px solid rgba(79,195,247,0.6);color:#fff;border-radius:10px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">Buscar</button></div>      <div id="cam-hint" style="margin-top:18px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.7);">Apunta al código</div>
-    </div>
-    <!-- Result bar -->
-    <div id="cam-result-bar" style="display:none;position:absolute;bottom:100px;left:20px;right:20px;background:rgba(0,0,0,0.7);backdrop-filter:blur(12px);border-radius:16px;padding:16px 20px;border:1px solid rgba(255,255,255,0.2);">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:4px;">Código encontrado</div>
-      <div id="cam-res-code" style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:#fff;"></div>
-      <div id="cam-res-desc" style="font-size:13px;color:rgba(255,255,255,0.75);margin-top:2px;"></div>
-      <div id="cam-res-alm" style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:#fff;margin-top:4px;"></div>
-    </div>
-    <!-- Controls -->
-    <div style="position:absolute;bottom:30px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:20px;">
-      <button onclick="closeCam()" style="padding:14px 32px;background:rgba(0,0,0,0.5);border:2px solid rgba(255,255,255,0.4);color:#fff;border-radius:50px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;cursor:pointer;backdrop-filter:blur(8px);">✕ Cerrar</button>
-      <button id="cam-ok-btn" onclick="confirmCam()" style="display:none;padding:14px 32px;background:rgba(79,195,247,0.3);border:2px solid #4fc3f7;color:#fff;border-radius:50px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:1px;cursor:pointer;backdrop-filter:blur(8px);">✓ Usar este</button>
     </div>
   </div>
   <div class="res-zone">
@@ -362,12 +384,40 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--txt);min-h
     </div>
   </div>
   <button class="btn-ok" id="bok" onclick="clrSrch()">OK</button>
+
+  <!-- CAMERA OVERLAY -->
+  <div id="cam-overlay" style="display:none;position:fixed;inset:0;z-index:300;flex-direction:column;">
+    <video id="cam-video" autoplay playsinline muted style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"></video>
+    <div id="cam-tint" style="position:absolute;inset:0;opacity:0;transition:opacity .4s;pointer-events:none;"></div>
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+      <div style="width:220px;height:80px;border:2px solid rgba(255,255,255,0.7);border-radius:12px;box-shadow:0 0 0 2000px rgba(0,0,0,0.45);position:relative;">
+        <div id="scan-line" style="position:absolute;left:4px;right:4px;height:2px;background:rgba(79,195,247,0.8);animation:scanline 1.8s ease-in-out infinite;"></div>
+      </div>
+      <div id="cam-hint" style="margin-top:18px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.7);">Apunta al código</div>
+      <div style="margin-top:14px;display:flex;gap:8px;align-items:center;">
+        <input id="cam-manual" type="tel" inputmode="numeric" placeholder="Código manual"
+          style="padding:10px 14px;background:rgba(0,0,0,0.5);border:1.5px solid rgba(255,255,255,0.35);border-radius:10px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;width:160px;outline:none;"
+          oninput="tryCamCode(this.value)"/>
+        <button onclick="tryCamCode(document.getElementById('cam-manual').value,true)"
+          style="padding:10px 16px;background:rgba(79,195,247,0.25);border:1.5px solid rgba(79,195,247,0.6);color:#fff;border-radius:10px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;cursor:pointer;">Buscar</button>
+      </div>
+    </div>
+    <div id="cam-result-bar" style="display:none;position:absolute;bottom:100px;left:20px;right:20px;background:rgba(0,0,0,0.7);backdrop-filter:blur(12px);border-radius:16px;padding:16px 20px;border:1px solid rgba(255,255,255,0.2);">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:4px;">Código encontrado</div>
+      <div id="cam-res-code" style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:#fff;"></div>
+      <div id="cam-res-desc" style="font-size:13px;color:rgba(255,255,255,0.75);margin-top:2px;"></div>
+      <div id="cam-res-alm" style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:#fff;margin-top:4px;"></div>
+    </div>
+    <div style="position:absolute;bottom:30px;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:20px;">
+      <button onclick="closeCam()" style="padding:14px 32px;background:rgba(0,0,0,0.5);border:2px solid rgba(255,255,255,0.4);color:#fff;border-radius:50px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;cursor:pointer;">✕ Cerrar</button>
+      <button id="cam-ok-btn" onclick="confirmCam()" style="display:none;padding:14px 32px;background:rgba(79,195,247,0.3);border:2px solid #4fc3f7;color:#fff;border-radius:50px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;cursor:pointer;">✓ Usar este</button>
+    </div>
+  </div>
 </div>
 
 <!-- ══ AJUSTES ══ -->
 <div id="pg-cfg" class="pg">
   <div class="hdr"><h1>Ajustes</h1></div>
-
   <div class="cfg-sec">
     <div class="cfg-sec-ttl">Tipo de letra</div>
     <div class="cfg-card">
@@ -381,7 +431,6 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--txt);min-h
       </button>
     </div>
   </div>
-
   <div class="cfg-sec">
     <div class="cfg-sec-ttl">Tamaño — Lista</div>
     <div class="cfg-card">
@@ -396,7 +445,6 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--txt);min-h
       </div>
     </div>
   </div>
-
   <div class="cfg-sec">
     <div class="cfg-sec-ttl">Tamaño — Buscador</div>
     <div class="cfg-card">
@@ -411,7 +459,6 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--txt);min-h
       </div>
     </div>
   </div>
-
   <div class="cfg-sec">
     <div class="cfg-sec-ttl">Tamaño — Resultado</div>
     <div class="cfg-card">
@@ -426,7 +473,6 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--txt);min-h
       </div>
     </div>
   </div>
-
   <div class="cfg-sec">
     <div class="cfg-sec-ttl">Vista previa</div>
     <div class="cfg-card cfg-preview">
@@ -439,6 +485,56 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--txt);min-h
     </div>
   </div>
 </div>
+
+<!-- ══ LISTA ══ -->
+<div id="pg-lista" class="pg" style="background:#fff;">
+  <div style="position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid #e0e0e0;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;">
+    <span style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;letter-spacing:2px;color:#111;">LISTA</span>
+    <div style="display:flex;gap:8px;">
+      <button onclick="clearLista()" style="background:none;border:1.5px solid #e53935;color:#e53935;border-radius:8px;padding:7px 14px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:1px;">BORRAR</button>
+      <button onclick="openListaModal()" style="background:#0f0f1a;border:none;color:#4fc3f7;border-radius:8px;padding:7px 16px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:1px;">+ CREAR LISTA</button>
+    </div>
+  </div>
+  <div id="lista-rows" style="padding:0;"></div>
+</div>
+
+<!-- Modal crear lista -->
+<div id="lista-modal-ov" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:600;align-items:flex-start;justify-content:center;backdrop-filter:blur(4px);">
+  <div style="background:#1a1a2e;border-bottom-left-radius:20px;border-bottom-right-radius:20px;width:100%;max-width:480px;padding:24px 20px 28px;border:1px solid #2d2d4e;border-top:none;animation:dn .25s ease;">
+    
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:#e8e8f0;">Agregar código</span>
+      <button onclick="closeListaModal()" style="background:none;border:2px solid #4fc3f7;color:#4fc3f7;border-radius:8px;padding:8px 16px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:1px;">TERMINAR</button>
+    </div>
+
+    <!-- Preview en tiempo real -->
+    <div id="lm-preview" style="min-height:48px;margin-bottom:16px;padding:12px 16px;border-radius:10px;background:#0f0f1a;border-left:4px solid #2d2d4e;transition:all .2s;">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:#7878a0;letter-spacing:1px;text-transform:uppercase;">Escribe un código para ver el producto</span>
+    </div>
+
+    <div style="margin-bottom:12px;">
+      <label style="display:block;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7878a0;margin-bottom:6px;">Código</label>
+      <input id="lm-code" type="tel" inputmode="numeric" pattern="[0-9]*"
+        placeholder="Ej: 1234"
+        autocomplete="off" spellcheck="false"
+        oninput="onLmCode(this.value)"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('lm-qty').focus();}"
+        style="width:100%;background:#0f0f1a;border:1px solid #2d2d4e;border-radius:10px;padding:14px;color:#e8e8f0;font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;outline:none;letter-spacing:2px;"/>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <label style="display:block;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7878a0;margin-bottom:6px;">Cantidad</label>
+      <input id="lm-qty" type="tel" inputmode="numeric" pattern="[0-9]*"
+        placeholder="Ej: 10"
+        autocomplete="off" spellcheck="false"
+        onkeydown="if(event.key==='Enter')addToListaFromModal()"
+        style="width:100%;background:#0f0f1a;border:1px solid #2d2d4e;border-radius:10px;padding:14px;color:#e8e8f0;font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;outline:none;letter-spacing:2px;"/>
+    </div>
+
+    <button onclick="addToListaFromModal()" style="width:100%;padding:16px;background:#4fc3f7;color:#0f0f1a;border:none;border-radius:12px;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;letter-spacing:2px;cursor:pointer;text-transform:uppercase;">OK — Agregar</button>
+  </div>
+</div>
+
 
 <!-- ══ NAV ══ -->
 <nav class="nav">
@@ -454,6 +550,12 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--txt);min-h
     </svg>
     Buscador
   </button>
+  <button class="nb" id="nb-lista" onclick="goTo('lista')">
+    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/>
+    </svg>
+    Lista
+  </button>
   <button class="nb" id="nb-cfg" onclick="goTo('cfg')">
     <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.43l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/>
@@ -462,6 +564,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--txt);min-h
     Ajustes
   </button>
 </nav>
+
 
 <!-- MODAL AGREGAR/EDITAR -->
 <div class="ov" id="mov" onclick="if(event.target.id==='mov')closeMod()">
@@ -510,6 +613,7 @@ body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--txt);min-h
 </div>
 
 <div class="toast" id="tst"></div>
+
 
 <script>
 // ══ DATA ══
@@ -608,13 +712,17 @@ function initCfg(){
 
 // ══ SPLASH ══
 function enterApp(){
-  const sp=document.getElementById('splash');
-  sp.classList.add('fade');
-  setTimeout(()=>{
-    sp.style.display='none';
-    document.body.style.overflow='';
-    goTo('search');
-  },600);
+  try{
+    var sp=document.getElementById('splash');
+    sp.classList.add('fade');
+    setTimeout(function(){
+      try{
+        sp.style.display='none';
+        document.body.style.overflow='';
+        goTo('search');
+      }catch(e){console.log('enterApp inner error:',e);}
+    },600);
+  }catch(e){console.log('enterApp error:',e);}
 }
 
 // ══ NAV ══
@@ -626,6 +734,7 @@ function goTo(n){
   if(n==='list')   renderList();
   if(n==='search') resetSrch();
   if(n==='cfg')    initCfg();
+  if(n==='lista') initLista();
 }
 
 // ══ LIST ══
@@ -755,6 +864,8 @@ function doSrch(v){
   else showDual(hits[0],hits[1]);
 }
 function showHit(it){
+  // Hide keyboard
+  document.getElementById('si').blur();
   const pg=document.getElementById('pg-search');
   pg.style.background=it.color;pg.style.color='white';
   document.getElementById('ri').style.display='none';
@@ -767,6 +878,8 @@ function showHit(it){
   document.getElementById('bok').classList.add('on');
 }
 function showDual(a,b){
+  // Hide keyboard
+  document.getElementById('si').blur();
   const pg=document.getElementById('pg-search');
   pg.style.background=`linear-gradient(135deg,${a.color} 50%,${b.color} 50%)`;
   pg.style.color='white';
@@ -928,6 +1041,7 @@ let impData=[], impCols=[], impMapping={};
 const IMP_FIELDS=[
   {key:'code',    label:'Código',      required:true},
   {key:'desc',    label:'Descripción', required:true},
+  {key:'almacen', label:'Almacén',     required:false},
   {key:'piezas',  label:'Piezas',      required:false},
   {key:'skip',    label:'— Ignorar —', required:false},
 ];
@@ -936,12 +1050,24 @@ const IMP_FIELDS=[
 const COL_HINTS={
   code:    ['codigo','código','code','clave','id','part','num','numero','número'],
   desc:    ['desc','descripcion','descripción','nombre','name','producto','material','articulo','artículo'],
+  almacen: ['almacen','almacén','alm','ubicacion','ubicación','destino','warehouse'],
   piezas:  ['pieza','piezas','cantidad','qty','quantity','cant','unidad','unidades'],
 };
 
 function importExcel(input){
   const file=input.files[0];
   if(!file) return;
+  if(typeof XLSX==='undefined'){
+    var s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload=function(){doImport(file);};
+    s.onerror=function(){tst('Error cargando librería Excel',1);};
+    document.head.appendChild(s);
+    return;
+  }
+  doImport(file);
+}
+function doImport(file){
   input.value=''; // reset so same file can be re-selected
   const reader=new FileReader();
   reader.onload=e=>{
@@ -1054,12 +1180,13 @@ async function runImport(){
       if(existingCodes.has(code.toUpperCase())){ skipped++; continue; }
       const piezas=impMapping.piezas!=null?String(row[impMapping.piezas]||'').trim():'';
       const fullDesc=piezas?`${desc} (${piezas} pzs)`:desc;
+      const almacen=impMapping.almacen!=null?String(row[impMapping.almacen]||'').trim():'—';
       items.push({
         id:uid(),
         code,
         desc:fullDesc,
-        almacen:'—',   // pending - user must edit
-        color:'#7878a0' // default gray until assigned
+        almacen: almacen||'—',
+        color:'#7878a0'
       });
       existingCodes.add(code.toUpperCase());
       added++;
@@ -1086,6 +1213,103 @@ async function runImport(){
     `<button class="btn-imp-ok" onclick="closeImport()" style="flex:1">Listo</button>`;
 }
 
+
+// ══ LISTA ══
+var listaRows=[];
+
+function initLista(){
+  renderListaRows();
+}
+
+function openListaModal(){
+  document.getElementById('lista-modal-ov').style.display='flex';
+  document.getElementById('lm-code').value='';
+  document.getElementById('lm-qty').value='';
+  document.getElementById('lm-preview').innerHTML='<span style="font-family:sans-serif;font-size:13px;color:#7878a0;letter-spacing:1px;text-transform:uppercase;">Escribe un c\u00f3digo para ver el producto</span>';
+  document.getElementById('lm-preview').style.borderLeftColor='#2d2d4e';
+  document.getElementById('lm-preview').style.background='#0f0f1a';
+  setTimeout(function(){document.getElementById('lm-code').focus();},100);
+}
+
+function closeListaModal(){
+  document.getElementById('lista-modal-ov').style.display='none';
+  renderListaRows();
+}
+
+function onLmCode(v){
+  var code=v.trim().toUpperCase();
+  var prev=document.getElementById('lm-preview');
+  if(!code){
+    prev.innerHTML='<span style="font-size:13px;color:#7878a0;text-transform:uppercase;letter-spacing:1px;">Escribe un c\u00f3digo para ver el producto</span>';
+    prev.style.borderLeftColor='#2d2d4e';
+    prev.style.background='#0f0f1a';
+    return;
+  }
+  var hits=items.filter(function(i){return i.code.toUpperCase()===code;});
+  if(hits.length>0){
+    prev.style.borderLeftColor=hits[0].color;
+    prev.style.background=hits[0].color+'22';
+    prev.innerHTML='<div style="font-family:sans-serif;font-size:18px;font-weight:900;color:'+hits[0].color+';">'+esc(hits[0].code)+'</div>'
+      +'<div style="font-size:13px;color:#e8e8f0;margin-top:2px;">'+esc(hits[0].desc)+'</div>'
+      +'<div style="font-size:12px;color:'+hits[0].color+';margin-top:2px;font-weight:700;">Alm. '+esc(hits[0].almacen)+'</div>';
+  } else {
+    prev.style.borderLeftColor='#e53935';
+    prev.style.background='#1a0a0a';
+    prev.innerHTML='<span style="font-size:13px;color:#e53935;">C\u00f3digo no encontrado</span>';
+  }
+}
+
+function addToListaFromModal(){
+  var code=document.getElementById('lm-code').value.trim().toUpperCase();
+  var qty=document.getElementById('lm-qty').value.trim();
+  if(!code){document.getElementById('lm-code').focus();return;}
+  var hits=items.filter(function(i){return i.code.toUpperCase()===code;});
+  if(hits.length>0){
+    hits.forEach(function(it){
+      listaRows.push({code:it.code,desc:it.desc,almacen:it.almacen,color:it.color,qty:qty,found:true});
+    });
+  } else {
+    listaRows.push({code:code,desc:'No encontrado',almacen:'—',color:null,qty:qty,found:false});
+  }
+  // Clear fields and focus code again
+  document.getElementById('lm-code').value='';
+  document.getElementById('lm-qty').value='';
+  document.getElementById('lm-preview').innerHTML='<span style="font-size:13px;color:#7878a0;text-transform:uppercase;letter-spacing:1px;">Escribe un c\u00f3digo para ver el producto</span>';
+  document.getElementById('lm-preview').style.borderLeftColor='#2d2d4e';
+  document.getElementById('lm-preview').style.background='#0f0f1a';
+  document.getElementById('lm-code').focus();
+}
+
+function renderListaRows(){
+  var cont=document.getElementById('lista-rows');
+  if(!listaRows.length){
+    cont.innerHTML='<div style="text-align:center;padding:60px 20px;color:#aaa;font-family:sans-serif;font-size:15px;">Pulsa + CREAR LISTA para comenzar</div>';
+    return;
+  }
+  var h='';
+  listaRows.forEach(function(r,i){
+    var bg=r.found?r.color+'15':'#f5f5f5';
+    var bl=r.found?'4px solid '+r.color:'4px solid #ddd';
+    var cc=r.found?r.color:'#aaa';
+    var dc=r.found?'#111':'#aaa';
+    h+='<div style="display:flex;align-items:center;gap:10px;padding:13px 18px;background:'+bg+';border-left:'+bl+';border-bottom:1px solid #f0f0f0;">';
+    h+='<span style="font-size:11px;color:#bbb;min-width:20px;">'+(i+1)+'</span>';
+    h+='<span style="font-family:sans-serif;font-size:18px;font-weight:900;color:'+cc+';min-width:70px;">'+esc(r.code)+'</span>';
+    h+='<span style="font-size:13px;color:'+dc+';flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(r.desc)+'</span>';
+    if(r.qty) h+='<span style="font-size:12px;font-weight:700;color:'+cc+';flex-shrink:0;background:'+cc+'22;padding:3px 8px;border-radius:6px;">x'+esc(r.qty)+'</span>';
+    if(r.found) h+='<span style="font-size:11px;font-weight:700;color:'+cc+';flex-shrink:0;margin-left:4px;">Alm.'+esc(r.almacen)+'</span>';
+    h+='</div>';
+  });
+  cont.innerHTML=h;
+}
+
+function clearLista(){
+  if(!listaRows.length) return;
+  listaRows=[];
+  renderListaRows();
+}
+
+
 // ══ UTILS ══
 function uid(){return Math.random().toString(36).slice(2,10);}
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -1093,46 +1317,8 @@ function r2h(rgb){if(!rgb||!rgb.startsWith('rgb'))return(rgb||'').toLowerCase();
 function tst(msg,err=0){const t=document.getElementById('tst');t.textContent=msg;t.className='toast'+(err?' err':'');t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2200);}
 
 // ══ INIT ══
-applyAll();
-renderList();
-setCol('#4fc3f7');
+try{ applyAll(); }catch(e){ console.log('applyAll err',e); }
+try{ setCol('#4fc3f7'); }catch(e){ console.log('setCol err',e); }
 </script>
-
-<!-- ══ IMPORT MODAL ══ -->
-<div class="imp-ov" id="imp-ov">
-  <div class="imp-box">
-    <div style="display:flex;align-items:center;justify-content:space-between;">
-      <span class="imp-title" id="imp-title">Importar Excel</span>
-      <button class="btn-cls" onclick="closeImport()">✕</button>
-    </div>
-
-    <!-- STEP 1: column mapping -->
-    <div id="imp-step1">
-      <div class="imp-subtitle" style="margin-bottom:8px;">Asigna cada columna del archivo</div>
-      <div class="col-map" id="col-map"></div>
-      <div class="imp-stats" id="imp-rows-info" style="margin-top:8px;"></div>
-    </div>
-
-    <!-- STEP 2: progress -->
-    <div id="imp-step2" style="display:none;gap:10px;flex-direction:column;">
-      <div class="imp-subtitle">Importando registros...</div>
-      <div class="imp-progress"><div class="imp-bar" id="imp-bar"></div></div>
-      <div class="imp-stats" id="imp-prog-txt">0 / 0</div>
-    </div>
-
-    <!-- STEP 3: done -->
-    <div id="imp-step3" style="display:none;text-align:center;padding:10px 0;">
-      <div style="font-size:40px;margin-bottom:8px;">✅</div>
-      <div class="imp-title" style="font-size:18px;" id="imp-done-txt"></div>
-      <div class="imp-stats" id="imp-done-sub" style="margin-top:4px;"></div>
-    </div>
-
-    <div class="imp-actions" id="imp-actions">
-      <button class="btn-imp-cancel" onclick="closeImport()">Cancelar</button>
-      <button class="btn-imp-ok" id="btn-imp-ok" onclick="runImport()" disabled>Importar</button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
